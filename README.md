@@ -48,7 +48,10 @@
 
 ## 📸 Screenshots
 
-> Coming soon — include screenshots or screen recordings here for better context.
+> ![image](https://github.com/user-attachments/assets/96ec6630-4733-4ce4-89ea-a40baf7b4017)
+> ![image](https://github.com/user-attachments/assets/54ca4689-12ed-417b-a63a-823f3e702aa1)
+
+
 
 ---
 
