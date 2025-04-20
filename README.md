@@ -1,6 +1,6 @@
 # 🚀 HashPay – Blockchain-Based UPI-Style Payment App
 
-**HashPay** is a decentralized mobile payment application built for **freelancers** and **consumers**, enabling fast, secure, and low-cost crypto transactions through a familiar UPI-style interface.
+**HashPay** is a decentralized mobile payment application built for **freelancers** and **consumers**, enabling fast, secure, and low-cost internation transactions through a familiar UPI-style interface.
 
 ---
 
