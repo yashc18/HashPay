@@ -5,7 +5,7 @@
 ---
 
 ## 🔑 Key Features
-
+-  Designed with a focus on cross-border compatibility, supporting secure, decentralized, and real-time global crypto payments.
 - 💸 **UPI-Style Crypto Payments**  
   Send and receive crypto (e.g., ETH) instantly like traditional UPI.
 
