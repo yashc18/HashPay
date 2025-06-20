@@ -44,9 +44,9 @@ fun HomeScreen(onNavigate: (String) -> Unit) {
                     contentDescription = "HashPay Logo",
                     tint = Color.Unspecified,
                     modifier = Modifier
-                        .height(50.dp) // Set a fixed height to prevent extra space
-                        .width(116.dp) // Keep the aspect ratio
-                        .clip(RoundedCornerShape(0.dp)) // Ensure it's not getting rounded
+                        .height(50.dp) 
+                        .width(116.dp) 
+                        .clip(RoundedCornerShape(0.dp)) 
                 )
 
 
@@ -198,8 +198,8 @@ fun ActionCard(
                     Icon(
                         painter = painterResource(id = icon),
                         contentDescription = null,
-                        tint = Color.Black, // Change as needed
-                        modifier = Modifier.size(24.dp) // Adjust size as needed
+                        tint = Color.Black, 
+                        modifier = Modifier.size(24.dp) 
                     )
                 }
 
