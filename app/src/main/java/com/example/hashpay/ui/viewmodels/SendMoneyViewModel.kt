@@ -151,7 +151,7 @@ class SendMoneyViewModel(private val context: Context) : ViewModel() {
                     .multiply(BigDecimal("1000000000000000000"))
                     .toBigInteger().toString(16)
 
-                // Use current address from wallet, not cached value
+                // Use current address from wallet
                 sendCrypto(
                     from = currentAddress,
                     to = _recipientAddress.value,
@@ -165,7 +165,7 @@ class SendMoneyViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    // Actual crypto sending function (previously in CryptoViewModel)
+    // Actual crypto sending function
     fun sendCrypto(from: String, to: String, amountInWei: String) {
         viewModelScope.launch {
             _transactionResult.value = TransactionState.Loading
