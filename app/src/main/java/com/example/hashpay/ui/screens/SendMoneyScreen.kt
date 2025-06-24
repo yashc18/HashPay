@@ -1,19 +1,17 @@
 package com.example.hashpay.ui.screens
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -21,6 +19,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hashpay.R
@@ -42,10 +44,13 @@ fun SendMoneyScreen(
     viewModel: SendMoneyViewModel,
     onBackClick: () -> Unit = {},
     onScanQrCode: () -> Unit = {}
-) {
+)
+{
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
+    // Collect states - using derivedStateOf where appropriate to reduce recompositions
     val isWalletConnected by viewModel.isWalletConnected.collectAsState()
     val walletAddress by viewModel.walletAddress.collectAsState()
     val showConnectionDialog by viewModel.showConnectionDialog.collectAsState()
@@ -55,7 +60,8 @@ fun SendMoneyScreen(
     val isTransactionInProgress by viewModel.isTransactionInProgress.collectAsState()
     val isConnecting by viewModel.isConnecting.collectAsState()
 
-    val scrollState = rememberScrollState()
+    // Remember contacts list to avoid recreation on recomposition
+    val contactsList = remember { listOf("Mahesh", "Dinesh", "Roshan") }
 
     // MetaMask wallet connection dialog
     if (showConnectionDialog) {
@@ -131,7 +137,7 @@ fun SendMoneyScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFF121212),
+        containerColor = Color(0xFF000000),
         topBar = {
             TopAppBar(
                 title = {
@@ -155,14 +161,24 @@ fun SendMoneyScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF000000))
             )
         },
         bottomBar = {
             Surface(
-                color = Color(0xFF121212),
-                shadowElevation = 8.dp,
+                color = Color(0xFF000000),
+                modifier = Modifier
+                    .shadow(
+                        elevation = 8.dp,
+                        spotColor = Color(0xFF222222),
+                    )
             ) {
+                // Animated send button with improved visual feedback
+                val buttonColor = animateColorAsState(
+                    targetValue = if(isWalletConnected) Color(0xFFB2FF59) else Color(0xFF666666),
+                    animationSpec = tween(300)
+                )
+
                 Button(
                     onClick = { viewModel.sendTransaction() },
                     modifier = Modifier
@@ -171,8 +187,9 @@ fun SendMoneyScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(28.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if(isWalletConnected) Color(0xFFB2FF59) else Color(0xFF666666)
-                    )
+                        containerColor = buttonColor.value
+                    ),
+                    enabled = isWalletConnected && !isTransactionInProgress
                 ) {
                     if (isTransactionInProgress) {
                         CircularProgressIndicator(
@@ -204,69 +221,104 @@ fun SendMoneyScreen(
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Wallet status card
+            // Enhanced wallet status card with animation
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF1E1E1E)
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
+                )
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF242424),
+                                    Color(0xFF1E1E1E)
+                                )
+                            )
+                        )
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Animated wallet icon
+                            val iconColor = animateColorAsState(
+                                targetValue = if (isWalletConnected) Color(0xFFB2FF59) else Color.Gray,
+                                animationSpec = tween(500)
+                            )
+
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_wallet),
                                 contentDescription = null,
-                                tint = if (isWalletConnected) Color(0xFFB2FF59) else Color.Gray,
+                                tint = iconColor.value,
                                 modifier = Modifier.size(28.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
-                            Column {
+
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = if (isWalletConnected) "MetaMask Connected" else "MetaMask Wallet",
                                     color = Color.White,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 if (isWalletConnected && walletAddress.isNotBlank()) {
                                     Text(
                                         text = formatWalletAddress(walletAddress),
                                         color = Color(0xFFB2FF59),
-                                        fontSize = 14.sp
+                                        fontSize = 14.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
-                        }
 
-                        Button(
-                            onClick = {
-                                if (!isWalletConnected) {
-                                    viewModel.setShowConnectionDialog(true)
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isWalletConnected) Color(0xFF66BB6A) else Color(0xFFB2FF59)
-                            ),
-                            modifier = Modifier.width(IntrinsicSize.Min)
-                        ) {
-                            Text(
-                                text = if (isWalletConnected) "Connected" else "Connect",
-                                color = if (isWalletConnected) Color.White else Color.Black
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            // Enhanced connect button with animation
+                            val buttonBgColor = animateColorAsState(
+                                targetValue = if (isWalletConnected) Color(0xFF66BB6A) else Color(0xFFB2FF59),
+                                animationSpec = tween(500)
                             )
+
+                            Button(
+                                onClick = {
+                                    if (!isWalletConnected) {
+                                        viewModel.setShowConnectionDialog(true)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = buttonBgColor.value
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    text = if (isWalletConnected) "Connected" else "Connect",
+                                    color = if (isWalletConnected) Color.White else Color.Black,
+                                    maxLines = 1
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            // Contacts section
+            // Improved contacts section
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -290,30 +342,35 @@ fun SendMoneyScreen(
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
+            // Using LazyRow for better scrolling performance
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Spacer(modifier = Modifier.width(4.dp))
-                ContactItem(name = "Add New", isAddNew = true, onClick = { /* TODO */ })
-                listOf("Mahesh", "Dinesh", "Roshan").forEach {
+                item {
+                    ContactItem(name = "Add New", isAddNew = true, onClick = { /* TODO */ })
+                }
+
+                items(contactsList) { contact ->
                     ContactItem(
-                        name = it,
-                        onClick = { viewModel.setRecipientAddress("0x" + it.hashCode().toString(16)) }
+                        name = contact,
+                        onClick = { viewModel.setRecipientAddress("0x" + contact.hashCode().toString(16)) }
                     )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
             }
 
-            // Transaction Details Card
+            // Enhanced transaction details card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF1E1E1E)
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
+                )
             ) {
                 Column(
                     modifier = Modifier
@@ -331,12 +388,15 @@ fun SendMoneyScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    // Improved text field styling
                     OutlinedTextField(
                         value = recipientAddress,
                         onValueChange = { viewModel.setRecipientAddress(it) },
                         label = { Text("Recipient Address", color = Color.Gray) },
                         textStyle = LocalTextStyle.current.copy(color = Color.White),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp)),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFFB2FF59),
                             unfocusedBorderColor = Color(0xFF444444),
@@ -357,13 +417,16 @@ fun SendMoneyScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Improved amount field
                     OutlinedTextField(
                         value = amountEth,
                         onValueChange = { viewModel.setAmountEth(it) },
                         label = { Text("Amount (ETH)", color = Color.Gray) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         textStyle = LocalTextStyle.current.copy(color = Color.White),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp)),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFFB2FF59),
                             unfocusedBorderColor = Color(0xFF444444),
@@ -383,7 +446,7 @@ fun SendMoneyScreen(
                 }
             }
 
-            // Quick Amount Buttons
+            // Quick Amount Section
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -397,45 +460,55 @@ fun SendMoneyScreen(
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-                    .horizontalScroll(rememberScrollState()),
+            // Quick amount buttons with improved animation
+            val amounts = remember { listOf("0.01", "0.05", "0.1", "0.5", "1.0") }
+            LazyRow(
+                contentPadding = PaddingValues(vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                listOf("0.01", "0.05", "0.1", "0.5", "1.0").forEach { amount ->
+                items(amounts) { amount ->
+                    val isSelected = amountEth == amount
+                    val backgroundColor = animateColorAsState(
+                        targetValue = if (isSelected) Color(0xFF2A2A2A) else Color.Transparent,
+                        animationSpec = tween(300)
+                    )
+                    val textColor = animateColorAsState(
+                        targetValue = if (isSelected) Color(0xFFB2FF59) else Color.White,
+                        animationSpec = tween(300)
+                    )
+
                     OutlinedButton(
                         onClick = { viewModel.setAmountEth(amount) },
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color(0xFFB2FF59),
-                            containerColor = if (amountEth == amount) Color(0xFF2A2A2A) else Color.Transparent
+                            contentColor = textColor.value,
+                            containerColor = backgroundColor.value
                         ),
                         border = BorderStroke(1.dp, SolidColor(Color(0xFF444444)))
                     ) {
                         Text(
                             text = "$amount ETH",
-                            color = if (amountEth == amount) Color(0xFFB2FF59) else Color.White
+                            color = textColor.value
                         )
                     }
                 }
             }
 
-            // Transaction Result
+            // Enhanced transaction result with animations
             AnimatedVisibility(
                 visible = transactionResult is TransactionState.Success || transactionResult is TransactionState.Error,
-                enter = fadeIn(),
-                exit = fadeOut()
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
             ) {
                 when (val state = transactionResult) {
                     is TransactionState.Success -> {
-                        if (!state.message.startsWith("Connected:")) {  // Don't show connection success here
+                        if (!state.message.startsWith("Connected:")) {
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 16.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF0A3300))
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF0A3300)),
+                                shape = RoundedCornerShape(16.dp)
                             ) {
                                 Row(
                                     modifier = Modifier.padding(16.dp),
@@ -458,7 +531,8 @@ fun SendMoneyScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF330000))
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF330000)),
+                            shape = RoundedCornerShape(16.dp)
                         ) {
                             Row(
                                 modifier = Modifier.padding(16.dp),
@@ -479,27 +553,44 @@ fun SendMoneyScreen(
                 }
             }
 
-            // Add extra space at the bottom
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
 
+// Enhanced contact item with animation
 @Composable
 fun ContactItem(name: String, isAddNew: Boolean = false, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(IntrinsicSize.Min)
-            .padding(horizontal = 4.dp)
+            .width(68.dp)
             .clickable(onClick = onClick)
     ) {
+        val interactionSource = remember { MutableInteractionSource() }
+        val isPressed by interactionSource.collectIsPressedAsState()
+
+        val scale = animateFloatAsState(
+            targetValue = if (isPressed) 0.9f else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
+
         Box(
             modifier = Modifier
                 .size(56.dp)
+                .scale(scale.value)
                 .clip(CircleShape)
+                .shadow(4.dp, CircleShape)
                 .background(
                     if (isAddNew) Color(0xFF333333) else getGradientColorForName(name)
+                )
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -518,7 +609,9 @@ fun ContactItem(name: String, isAddNew: Boolean = false, onClick: () -> Unit) {
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = if (isAddNew) "Add New" else name,
             color = Color.White,
@@ -526,7 +619,7 @@ fun ContactItem(name: String, isAddNew: Boolean = false, onClick: () -> Unit) {
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.width(68.dp)
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -546,4 +639,16 @@ private fun getGradientColorForName(name: String): Color {
         in 'm'..'r' -> Color(0xFF43A047) // Green
         else -> Color(0xFFE53935) // Red
     }
+}
+@Preview(showBackground = true)
+@Composable
+fun SendMoneyScreenPreview() {
+    val context = LocalContext.current
+    val viewModel = remember { SendMoneyViewModel(context) }
+
+    SendMoneyScreen(
+        viewModel = viewModel,
+        onBackClick = {},
+        onScanQrCode = {}
+    )
 }

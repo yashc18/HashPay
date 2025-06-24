@@ -12,6 +12,7 @@ import io.metamask.androidsdk.Result
 import io.metamask.androidsdk.SDKOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import java.math.BigInteger
 import java.security.MessageDigest
 
@@ -70,36 +71,60 @@ class EthereumManager(context: Context) {
     // Get account balance
     suspend fun getBalance(address: String): Result = withContext(Dispatchers.IO) {
         Log.d(TAG, "Getting balance for address: $address")
+
+        // First check if we're properly connected
+        if (ethereum.selectedAddress.isEmpty()) {
+            Log.d(TAG, "Not connected to MetaMask, attempting to connect first")
+            val connectResult = connect()
+            if (connectResult !is Result.Success) {
+                Log.e(TAG, "Failed to connect to MetaMask")
+                return@withContext Result.Error(RequestError(401, "Not connected to MetaMask"))
+            }
+        }
+
         try {
-            val balanceResult = ethereum.sendRequest(
-                EthereumRequest(
-                    method = EthereumMethod.ETH_GET_BALANCE.value,
-                    params = listOf(address, "latest")
+            // Use a timeout to prevent infinite recursion
+            withTimeout(10000) {
+                val balanceResult = ethereum.sendRequest(
+                    EthereumRequest(
+                        method = EthereumMethod.ETH_GET_BALANCE.value,
+                        params = listOf(address, "latest")
+                    )
                 )
-            )
 
-            Log.d(TAG, "Balance result: $balanceResult")
+                Log.d(TAG, "Balance result: $balanceResult")
 
-            when (balanceResult) {
-                is Result.Success.Item -> {
-                    val hexValue = balanceResult.value
-                    val cleanHexString = if (hexValue.startsWith("0x")) {
-                        hexValue.substring(2)
-                    } else {
-                        hexValue
+                when (balanceResult) {
+                    is Result.Success.Item -> {
+                        val hexValue = balanceResult.value
+                        val cleanHexString = if (hexValue.startsWith("0x")) {
+                            hexValue.substring(2)
+                        } else {
+                            hexValue
+                        }
+
+                        val balanceInWei = BigInteger(cleanHexString, 16)
+                        Log.d(TAG, "Balance in wei: $balanceInWei")
+
+                        Result.Success.Item(balanceInWei.toString())
                     }
-
-                    val balanceInWei = BigInteger(cleanHexString, 16)
-                    Log.d(TAG, "Balance in wei: $balanceInWei")
-
-                    Result.Success.Item(balanceInWei.toString())
+                    else -> balanceResult
                 }
-                else -> balanceResult
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting balance: ${e.message}")
             Result.Error(RequestError(404, e.message ?: "Unknown error"))
         }
+    }
+
+    // Add this helper method to ensure connection
+    suspend fun ensureConnected(): Boolean = withContext(Dispatchers.IO) {
+        if (ethereum.selectedAddress.isNotEmpty()) {
+            return@withContext true
+        }
+
+        val result = connect()
+        return@withContext result is Result.Success
     }
 
     // Send ETH (basic transaction)

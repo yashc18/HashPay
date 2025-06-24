@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
+
 }
 
 android {
@@ -75,12 +77,20 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.1")
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
     implementation("io.metamask.androidsdk:metamask-android-sdk:0.5.0")
-// DataStore dependencies
+
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.datastore:datastore-preferences-core:1.0.0")
+    implementation ("com.google.zxing:core:3.5.0")
+    implementation ("androidx.compose.ui:ui-text-google-fonts:1.5.4")
 
     implementation("org.web3j:core:4.9.4")
     implementation("org.web3j:abi:4.9.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.31.3-beta")
+
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
 }

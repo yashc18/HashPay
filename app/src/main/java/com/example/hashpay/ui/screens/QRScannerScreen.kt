@@ -5,18 +5,19 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.OptIn
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -326,30 +327,75 @@ fun QRScannerScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Scanned Result:",
+                                text = "Wallet Address Detected!",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
                             )
+
                             Spacer(modifier = Modifier.height(8.dp))
+
                             Text(
                                 text = qrCodeText,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color(0xFFB2FF59)
+                                color = Color(0xFFB2FF59),
+                                textAlign = TextAlign.Center
                             )
+
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = { onBackPressed() },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFFB2FF59),
-                                    contentColor = Color.Black
-                                )
+
+                            // Add address validation indicator
+                            val isValidAddress = qrCodeText.startsWith("0x") && qrCodeText.length == 42
+                            if (isValidAddress) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color(0xFFB2FF59),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Valid Ethereum Address",
+                                        color = Color(0xFFB2FF59),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("Continue")
+                                OutlinedButton(
+                                    onClick = { onBackPressed() },
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = Color.White
+                                    ),
+                                    border = BorderStroke(1.dp, Color.Gray),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Cancel")
+                                }
+
+                                Button(
+                                    onClick = { onQRCodeScanned(qrCodeText) },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFB2FF59),
+                                        contentColor = Color.Black
+                                    ),
+                                    modifier = Modifier.weight(1f),
+                                    enabled = isValidAddress
+                                ) {
+                                    Text("Proceed to Payment", fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
                     }
                 }
-
                 // Control buttons
                 Row(
                     modifier = Modifier
