@@ -158,7 +158,6 @@ fun QRScannerScreen(
 
             // Scanner Overlay
             Box(modifier = Modifier.fillMaxSize()) {
-                // Dimmed background
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val scannerSize = size.width * 0.8f
                     val left = (size.width - scannerSize) / 2
@@ -167,7 +166,6 @@ fun QRScannerScreen(
                     val bottom = top + scannerSize
                     val overlayColor = Color.Black.copy(alpha = 0.6f)
 
-                    // Draw four separate rectangles around the scanner area
                     // Top rectangle
                     drawRect(
                         color = overlayColor,
@@ -427,12 +425,6 @@ fun QRScannerScreen(
                             .size(48.dp)
                             .background(Color.Black.copy(alpha = 0.5f), shape = RoundedCornerShape(24.dp))
                     ) {
-                        // Uncomment and add proper icon imports when available
-                        // Icon(
-                        //     imageVector = if (flashEnabled) Icons.Default.FlashOn else Icons.Default.FlashOff,
-                        //     contentDescription = "Flashlight",
-                        //     tint = if (flashEnabled) Color(0xFFB2FF59) else Color.White
-                        // )
                     }
                 }
             }
@@ -446,13 +438,6 @@ fun QRScannerScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Uncomment when icon is available
-                // Icon(
-                //     imageVector = Icons.Default.FlashOff,
-                //     contentDescription = null,
-                //     modifier = Modifier.size(80.dp),
-                //     tint = Color(0xFFB2FF59)
-                // )
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
                     text = "Camera Permission Required",
