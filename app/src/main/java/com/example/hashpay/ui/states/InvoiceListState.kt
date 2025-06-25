@@ -12,3 +12,4 @@ data class InvoiceListState(
     val showOverdue: Boolean = true,
     val searchQuery: String = ""
 )
+

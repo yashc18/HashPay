@@ -1,24 +1,32 @@
 package com.example.hashpay.ui.viewmodels
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.hashpay.WalletConnectionManager
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(application: Application) : AndroidViewModel(application) {
+    private val walletManager = WalletConnectionManager.getInstance(application)
+
     private val _userName = MutableStateFlow("John Doe")
     val userName = _userName.asStateFlow()
 
     private val _userEmail = MutableStateFlow("john.doe@example.com")
     val userEmail = _userEmail.asStateFlow()
 
-    private val _walletAddress = MutableStateFlow("0x7F45764657eB2552c3A8720aD5666bF83d52aE7c")
+    private val _walletAddress = MutableStateFlow("")
     val walletAddress = _walletAddress.asStateFlow()
 
-    private val _walletBalance = MutableStateFlow(BigDecimal("1.234"))
+    private val _walletBalance = MutableStateFlow(BigDecimal("0.0"))
     val walletBalance = _walletBalance.asStateFlow()
 
-    private val _isWalletConnected = MutableStateFlow(true)
+    private val _isWalletConnected = MutableStateFlow(false)
     val isWalletConnected = _isWalletConnected.asStateFlow()
 
     private val _stats = MutableStateFlow(
@@ -39,6 +47,20 @@ class ProfileViewModel : ViewModel() {
     )
     val settings = _settings.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            walletManager.isConnected.collectLatest { isConnected ->
+                _isWalletConnected.value = isConnected
+            }
+        }
+
+        viewModelScope.launch {
+            walletManager.walletAddress.collectLatest { address ->
+                _walletAddress.value = address
+            }
+        }
+    }
+
     fun toggleSetting(key: String) {
         _settings.value = _settings.value.toMutableMap().apply {
             this[key] = !(this[key] as Boolean)
@@ -46,7 +68,14 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun updateWalletConnection(isConnected: Boolean) {
-        _isWalletConnected.value = isConnected
+        viewModelScope.launch {
+            if (isConnected) {
+                // Don't try to connect here - just wait for the toggle to propagate
+                // The HomeScreen will handle the actual connection
+            } else {
+                walletManager.disconnectWallet()
+            }
+        }
     }
 
     fun updateUserName(name: String) {

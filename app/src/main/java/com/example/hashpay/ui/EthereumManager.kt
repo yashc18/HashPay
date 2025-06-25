@@ -69,11 +69,16 @@ class EthereumManager(context: Context) {
     }
 
     // Get account balance
-    suspend fun getBalance(address: String): Result = withContext(Dispatchers.IO) {
+    suspend fun getBalance(address: String, skipAutoConnect: Boolean = false): Result = withContext(Dispatchers.IO) {
         Log.d(TAG, "Getting balance for address: $address")
 
         // First check if we're properly connected
         if (ethereum.selectedAddress.isEmpty()) {
+            if (skipAutoConnect) {
+                Log.d(TAG, "Not connected to MetaMask and auto-connect skipped")
+                return@withContext Result.Error(RequestError(401, "Not connected to MetaMask"))
+            }
+
             Log.d(TAG, "Not connected to MetaMask, attempting to connect first")
             val connectResult = connect()
             if (connectResult !is Result.Success) {

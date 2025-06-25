@@ -14,7 +14,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.hashpay.WalletConnectionManager
@@ -23,6 +28,8 @@ import com.example.hashpay.ui.screens.*
 import com.example.hashpay.ui.screens.invoice.CreateInvoiceScreen
 import com.example.hashpay.ui.screens.invoice.InvoiceDetailScreen
 import com.example.hashpay.ui.screens.invoice.InvoiceListScreen
+import com.example.hashpay.ui.viewmodels.DepositViewModel
+import com.example.hashpay.ui.viewmodels.DepositViewModelFactory
 import com.example.hashpay.ui.viewmodels.ProfileViewModel
 import com.example.hashpay.ui.viewmodels.SendMoneyViewModel
 import com.example.hashpay.ui.viewmodels.TransactionHistoryViewModel
@@ -36,6 +43,8 @@ object NavDestinations {
     const val SEND_MONEY = "send_money"
     const val INVOICE = "invoice"
     const val CREATE_INVOICE = "create_invoice"
+    const val DEPOSIT = "deposit"
+    const val EXCHANGE = "exchange"
 }
 
 /**
@@ -115,8 +124,11 @@ fun AppNavHost(
         }
 
         composable(NavDestinations.PROFILE) {
-            // Create ProfileViewModel
-            val profileViewModel: ProfileViewModel = viewModel()
+            // Create ProfileViewModel with Application context
+            val context = LocalContext.current
+            val profileViewModel: ProfileViewModel = viewModel(
+                factory = ViewModelProvider.AndroidViewModelFactory(context.applicationContext as android.app.Application)
+            )
 
             ProfileScreen(
                 onNavigateBack = { navController.popBackStack() },
@@ -180,6 +192,31 @@ fun AppNavHost(
             )
         }
 
+        composable(NavDestinations.DEPOSIT) {
+            val context = LocalContext.current
+            val depositViewModel = androidx.lifecycle.viewmodel.compose.viewModel<DepositViewModel>(
+                factory = DepositViewModelFactory(context)
+            )
+
+            DepositScreen(
+                viewModel = depositViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // Add exchange route with a temporary placeholder
+        composable(NavDestinations.EXCHANGE) {
+            // Temporary placeholder for exchange feature
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Exchange feature coming soon!",
+                    color = Color.White
+                )
+            }
+        }
         composable(NavDestinations.WITHDRAW) {
             // TODO: Implement WithdrawScreen
         }

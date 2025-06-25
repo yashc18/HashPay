@@ -97,8 +97,13 @@ class WalletConnectionManager private constructor(private val context: Context) 
         connectWallet(address, "smartcontract")
     }
 
-    // New method to ensure wallet is connected without user prompts
-    suspend fun ensureWalletConnected(ethereumManager: EthereumManager): Boolean {
+    // Modified to explicitly require user action
+    suspend fun ensureWalletConnected(ethereumManager: EthereumManager, requireUserAction: Boolean = true): Boolean {
+        // If we require user action, don't auto-connect
+        if (requireUserAction) {
+            return _isConnected.value
+        }
+
         val isConnected = _isConnected.value
         val address = _walletAddress.value
 

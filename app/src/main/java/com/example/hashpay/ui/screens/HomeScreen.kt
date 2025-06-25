@@ -1,15 +1,14 @@
 package com.example.hashpay.ui.screens
 
 import android.content.Context
-import android.graphics.Paint.Style
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState // Added missing import
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,10 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,21 +33,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hashpay.R
 import com.example.hashpay.ui.theme.HashPayTheme
 import com.example.hashpay.ui.theme.SpaceGrotesk
-import com.example.hashpay.ui.viewmodels.HomeScreenViewModel
 
 class HomeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(HomeScreenViewModel::class.java)) {
-            return HomeScreenViewModel(context) as T
+        if (modelClass.isAssignableFrom(com.example.hashpay.ui.viewmodels.HomeScreenViewModel::class.java)) {
+            return com.example.hashpay.ui.viewmodels.HomeScreenViewModel(context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeScreenViewModel = viewModel(factory = HomeViewModelFactory(LocalContext.current)),
+    viewModel: com.example.hashpay.ui.viewmodels.HomeScreenViewModel = viewModel(factory = HomeViewModelFactory(LocalContext.current)),
     onNavigate: (String) -> Unit
 ) {
     // Collect states from ViewModel
@@ -71,7 +67,8 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = colorResource(id = R.color.black)
+        containerColor = Color(0xFF0F0F0F),
+        contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -95,17 +92,14 @@ fun HomeScreen(
                     modifier = Modifier
                         .height(50.dp)
                         .width(116.dp)
-                        .clip(RoundedCornerShape(0.dp))
                 )
             }
 
             Text(
-                text = "Welcome, Back 👋",
-                style = TextStyle(
-                    fontFamily = SpaceGrotesk,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                )
+                text = "Welcome Back 👋",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontFamily = SpaceGrotesk
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -116,18 +110,19 @@ fun HomeScreen(
                 color = Color.White,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                style = TextStyle(
-                    fontFamily = SpaceGrotesk,
-                )
+                fontFamily = SpaceGrotesk
             )
 
-            // Wallet Card
+            // Wallet Card with updated design
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .height(200.dp),
                 shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Transparent
+                )
             ) {
                 Box(
                     modifier = Modifier
@@ -135,9 +130,9 @@ fun HomeScreen(
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFF004D40),
-                                    Color(0xFF00796B),
-                                    Color(0xFF009688)
+                                    Color(0xFF0A1D17),
+                                    Color(0xFF143029),
+                                    Color(0xFF1E4439)
                                 )
                             )
                         )
@@ -146,7 +141,7 @@ fun HomeScreen(
                     if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
-                            color = colorResource(id = R.color.NeonGreen)
+                            color = Color(0xFF9FE870)
                         )
                     }
 
@@ -172,7 +167,8 @@ fun HomeScreen(
                                 Text(
                                     text = "MetaMask",
                                     color = Color.White,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    fontFamily = SpaceGrotesk
                                 )
                             }
 
@@ -180,10 +176,10 @@ fun HomeScreen(
                                 checked = isWalletToggleOn,
                                 onCheckedChange = { viewModel.toggleWalletConnection(it) },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color(0xFFB2FF59),
-                                    checkedTrackColor = Color(0xFF004D40),
-                                    uncheckedThumbColor = Color.LightGray,
-                                    uncheckedTrackColor = Color(0xFF004D40).copy(alpha = 0.5f)
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = Color(0xFF4CAF50),
+                                    uncheckedThumbColor = Color(0xFF9E9E9E),
+                                    uncheckedTrackColor = Color(0xFF424242)
                                 )
                             )
                         }
@@ -200,8 +196,9 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "ETH",
-                                color = Color(0xFFB2FF59),
-                                fontSize = 18.sp
+                                color = Color(0xFF9FE870),
+                                fontSize = 18.sp,
+                                fontFamily = SpaceGrotesk
                             )
                         }
 
@@ -212,7 +209,8 @@ fun HomeScreen(
                             text = if (isWalletConnected) balance else "0.0",
                             color = Color.White,
                             fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = SpaceGrotesk
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -228,7 +226,8 @@ fun HomeScreen(
                                     text = if (isWalletConnected) viewModel.formatWalletAddress(walletAddress) else "Not connected",
                                     color = Color.White.copy(alpha = 0.7f),
                                     fontSize = 14.sp,
-                                    letterSpacing = 2.sp
+                                    letterSpacing = 2.sp,
+                                    fontFamily = SpaceGrotesk
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
@@ -237,7 +236,8 @@ fun HomeScreen(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
+                                    fontFamily = SpaceGrotesk
                                 )
                             }
                         }
@@ -245,61 +245,218 @@ fun HomeScreen(
                 }
             }
 
-            // Action Cards
+            // Action Cards Section
+            Text(
+                text = "Quick Actions",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = SpaceGrotesk,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+
+            // Action Cards with updated design
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 ActionCard(
                     title = "Send",
-                    backgroundColor = Color(0xFFFF9999), // Light Red
+                    backgroundColor = Color(0xFF1F1F1F),
+                    iconColor = Color(0xFFFF6B6B),
                     icon = R.drawable.ic_send,
                     onClick = { onNavigate("send_money") }
                 )
 
                 ActionCard(
                     title = "Deposit",
-                    backgroundColor = Color(0xFF99FF99), // Light Green
+                    backgroundColor = Color(0xFF1F1F1F),
+                    iconColor = Color(0xFF9FE870),
                     icon = R.drawable.ic_desposit,
                     onClick = { onNavigate("deposit") }
                 )
 
                 ActionCard(
                     title = "Exchange",
-                    backgroundColor = Color(0xFF99FFFF), // Light Cyan
+                    backgroundColor = Color(0xFF1F1F1F),
+                    iconColor = Color(0xFF06B6D4),
                     icon = R.drawable.ic_exchange,
                     onClick = { onNavigate("exchange") }
                 )
 
                 ActionCard(
                     title = "Request",
-                    backgroundColor = Color(0xFFFFFF99), // Light Yellow
+                    backgroundColor = Color(0xFF1F1F1F),
+                    iconColor = Color(0xFFFFE066),
                     icon = R.drawable.ic_recieve,
-                    onClick = { onNavigate("request") }
+                    onClick = { onNavigate("create_invoice") }
                 )
             }
 
             // History Section
-            Text(
-                text = "History",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recent Transactions",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = SpaceGrotesk
+                )
 
-            // Empty space for history items
-            Spacer(modifier = Modifier.weight(1f))
+                TextButton(onClick = { onNavigate("history") }) {
+                    Text(
+                        "View All",
+                        color = Color(0xFF9E9E9E),
+                        fontFamily = SpaceGrotesk,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            // Placeholder for transactions
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Empty state or sample transactions would go here
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (!isWalletConnected) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_empty),
+                                    contentDescription = null,
+                                    tint = Color(0xFF6B7280),
+                                    modifier = Modifier.size(40.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "Connect your wallet to see transactions",
+                                    color = Color(0xFF6B7280),
+                                    fontFamily = SpaceGrotesk,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+                            // This would be replaced with actual transactions
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator(
+                                    color = Color(0xFF9FE870),
+                                    strokeWidth = 2.dp,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "Loading transactions...",
+                                    color = Color(0xFF6B7280),
+                                    fontFamily = SpaceGrotesk
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Invoices Section
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Invoices",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = SpaceGrotesk
+                )
+
+                TextButton(onClick = { onNavigate("invoice") }) {
+                    Text(
+                        "View All",
+                        color = Color(0xFF9E9E9E),
+                        fontFamily = SpaceGrotesk,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            // Placeholder for invoices
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Empty state or sample transactions would go here
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_money),
+                                contentDescription = null,
+                                tint = Color(0xFFFFE066),
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Create your first invoice",
+                                color = Color(0xFF6B7280),
+                                fontFamily = SpaceGrotesk,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(
+                                onClick = { onNavigate("create_invoice") },
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9FE870))
+                            ) {
+                                Text(
+                                    "Create Invoice",
+                                    color = Color.Black,
+                                    fontFamily = SpaceGrotesk,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
-} // Fixed: Properly closed HomeScreen composable
+}
 
 @Composable
 fun ActionCard(
     title: String,
     backgroundColor: Color,
+    iconColor: Color,
     icon: Int,
     onClick: () -> Unit
 ) {
@@ -309,43 +466,41 @@ fun ActionCard(
             .padding(4.dp)
             .clickable { onClick() }
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .height(90.dp)
-                .width(78.dp)
-                .background(backgroundColor, shape = RoundedCornerShape(1.dp))
-                .padding(8.dp)
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = backgroundColor),
+            modifier = Modifier.size(70.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
             ) {
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color.White),
+                        .background(Color(0xFF2A2A2A)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(id = icon),
-                        contentDescription = null,
-                        tint = Color.Black,
-                        modifier = Modifier.size(24.dp)
+                        contentDescription = title,
+                        tint = iconColor,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = title,
-                    color = Color.Black,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center
-                )
             }
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = title,
+            color = Color.White,
+            fontSize = 12.sp,
+            fontFamily = SpaceGrotesk,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -361,7 +516,7 @@ fun HomeScreenPreview() {
 fun PreviewHomeScreen() {
     val previewContext = LocalContext.current
     val viewModelFactory = HomeViewModelFactory(previewContext)
-    val previewViewModel: HomeScreenViewModel = viewModel(factory = viewModelFactory)
+    val previewViewModel: com.example.hashpay.ui.viewmodels.HomeScreenViewModel = viewModel(factory = viewModelFactory)
 
     HomeScreen(
         viewModel = previewViewModel,

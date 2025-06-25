@@ -197,33 +197,33 @@ fun SendMoneyScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
+                        colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
-                        cursorColor = Color.White,
+                            cursorColor = Color.White,
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         focusedContainerColor = Color(0xFF1F1F1F),
                         unfocusedContainerColor = Color(0xFF1F1F1F)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                     textStyle = LocalTextStyle.current.copy(
                         fontFamily = SpaceGrotesk,
                         fontSize = 16.sp
                     ),
-                    trailingIcon = {
-                        IconButton(onClick = onScanQrCode) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.qr_scanner),
+                        trailingIcon = {
+                            IconButton(onClick = onScanQrCode) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.qr_scanner),
                                 contentDescription = "Scan QR",
                                 tint = Color(0xFF9E9E9E)
-                            )
+                                )
+                            }
                         }
-                    }
-                )
+                    )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
             // Amount Input with dropdown
             Surface(
@@ -231,9 +231,9 @@ fun SendMoneyScreen(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(
-                    value = amountEth,
-                    onValueChange = { viewModel.setAmountEth(it) },
+                    OutlinedTextField(
+                        value = amountEth,
+                        onValueChange = { viewModel.setAmountEth(it) },
                     placeholder = {
                         Text(
                             "Amount (ETH)",
@@ -241,25 +241,25 @@ fun SendMoneyScreen(
                             fontFamily = SpaceGrotesk
                         )
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier
-                        .fillMaxWidth()
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier
+                            .fillMaxWidth()
                         .height(56.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
+                        colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
-                        cursorColor = Color.White,
+                            cursorColor = Color.White,
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         focusedContainerColor = Color(0xFF1F1F1F),
                         unfocusedContainerColor = Color(0xFF1F1F1F)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                     textStyle = LocalTextStyle.current.copy(
                         fontFamily = SpaceGrotesk,
                         fontSize = 16.sp
                     ),
-                    trailingIcon = {
+                        trailingIcon = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(end = 12.dp)
@@ -300,32 +300,7 @@ fun SendMoneyScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Transaction Info
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    "Estimated Gas Fee: 0.001 ETH",
-                    color = Color(0xFF6B7280),
-                    fontFamily = SpaceGrotesk,
-                    fontSize = 14.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    "Current Balance: 1.234 ETH",
-                    color = Color(0xFF6B7280),
-                    fontFamily = SpaceGrotesk,
-                    fontSize = 14.sp
-                )
-            }
+            // Transaction Info Section
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -345,14 +320,14 @@ fun SendMoneyScreen(
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text(
+                Text(
                         "Use MetaMask",
-                        color = Color.White,
+                    color = Color.White,
                         fontFamily = SpaceGrotesk,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
-                    )
-                }
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp
+                )
+            }
 
                 Switch(
                     checked = isWalletConnected,
@@ -433,10 +408,10 @@ fun SendMoneyScreen(
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = when (transactionResult) {
                             is TransactionState.Success -> Color(0xFF1F3A1F)
@@ -448,9 +423,9 @@ fun SendMoneyScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
                                 painter = painterResource(
                                     id = when (transactionResult) {
                                         is TransactionState.Success -> R.drawable.ic_check
@@ -462,9 +437,9 @@ fun SendMoneyScreen(
                                     is TransactionState.Success -> Color(0xFF9FE870)
                                     else -> Color(0xFFFF6B6B)
                                 },
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = when (transactionResult) {
@@ -512,7 +487,7 @@ fun SendMoneyScreen(
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = "Hash: ${shortenAddress(hash)}",
@@ -537,8 +512,8 @@ fun SendMoneyScreen(
                                             ).show()
                                         },
                                         modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Icon(
+                            ) {
+                                Icon(
                                             painter = painterResource(id = R.drawable.ic_copy),
                                             contentDescription = "Copy hash",
                                             tint = Color(0xFF9FE870)
