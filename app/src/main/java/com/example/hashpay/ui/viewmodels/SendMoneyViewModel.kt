@@ -49,7 +49,7 @@ class SendMoneyViewModel(private val context: Context) : ViewModel() {
 
     private val _isConnecting = MutableStateFlow(false)
     val isConnecting: StateFlow<Boolean> = _isConnecting.asStateFlow()
-//RoomDB
+    //RoomDB
     private val transactionRepository = AppDatabaseProvider.getTransactionRepository()
     private val contactRepository = AppDatabaseProvider.getContactRepository()
 

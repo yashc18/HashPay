@@ -21,21 +21,40 @@ class TransactionHistoryViewModel(application: Application) : AndroidViewModel(a
     private val _transactions = MutableStateFlow<List<Transaction>>(emptyList())
     val transactions: StateFlow<List<Transaction>> = _transactions
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _networkType = MutableStateFlow("sepolia")
+    val networkType: StateFlow<String> = _networkType
+
+    private var allTransactions: List<Transaction> = emptyList()
+
     init {
         loadTransactions()
+        loadNetworkType()
     }
 
-    // In TransactionHistoryViewModel
+    private fun loadNetworkType() {
+        viewModelScope.launch {
+            _networkType.value = "sepolia"
+        }
+    }
+
     private fun loadTransactions() {
         viewModelScope.launch {
+            _isLoading.value = true
             val walletAddress = walletManager.walletAddress.first()
             Log.d("TransactionHistory", "Loading transactions for address: $walletAddress")
 
             if (walletAddress.isNotBlank()) {
                 transactionRepository.getTransactionsByAddress(walletAddress).collectLatest { txList ->
                     Log.d("TransactionHistory", "Received ${txList.size} transactions")
+                    allTransactions = txList
                     _transactions.value = txList
+                    _isLoading.value = false
                 }
+            } else {
+                _isLoading.value = false
             }
         }
     }
@@ -44,18 +63,31 @@ class TransactionHistoryViewModel(application: Application) : AndroidViewModel(a
         loadTransactions()
     }
 
-    // Call this when navigating to the history screen
     fun filterTransactions(status: String? = null) {
         viewModelScope.launch {
+            _isLoading.value = true
+
             if (status != null) {
-                transactionRepository.getTransactionsByStatus(status).collectLatest { txList ->
-                    _transactions.value = txList
-                }
+                // Filter in memory rather than calling a non-existent repository method
+                _transactions.value = allTransactions.filter { it.status == status }
+                Log.d("TransactionHistory", "Filtered to ${_transactions.value.size} transactions with status: $status")
             } else {
-                loadTransactions() // Reset to default view
+                // Reset to show all transactions
+                _transactions.value = allTransactions
+                Log.d("TransactionHistory", "Reset to all ${allTransactions.size} transactions")
             }
+
+            _isLoading.value = false
         }
     }
 
-
+    fun getEtherscanUrl(txHash: String): String {
+        val baseUrl = when (networkType.value) {
+            "mainnet" -> "https://etherscan.io/tx/"
+            "sepolia" -> "https://sepolia.etherscan.io/tx/"
+            "goerli" -> "https://goerli.etherscan.io/tx/"
+            else -> "https://sepolia.etherscan.io/tx/"
+        }
+        return baseUrl + txHash
+    }
 }

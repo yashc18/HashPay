@@ -71,7 +71,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = colorResource(id = R.color.GreenishBlack)
+        containerColor = colorResource(id = R.color.black)
     ) { innerPadding ->
         Column(
             modifier = Modifier

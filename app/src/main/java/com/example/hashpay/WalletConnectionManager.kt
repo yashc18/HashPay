@@ -1,12 +1,15 @@
 package com.example.hashpay
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.hashpay.ui.EthereumManager
+import io.metamask.androidsdk.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,6 +73,7 @@ class WalletConnectionManager private constructor(private val context: Context) 
         _walletAddress.value = address
         _walletType.value = type
         _showConnectionDialog.value = false
+        Log.d("WalletManager", "Wallet connected: $address ($type)")
     }
 
     suspend fun disconnectWallet() {
@@ -77,6 +81,7 @@ class WalletConnectionManager private constructor(private val context: Context) 
             preferences[WALLET_CONNECTED] = false
         }
         _isConnected.value = false
+        Log.d("WalletManager", "Wallet disconnected")
     }
 
     fun requestConnection() {
@@ -90,5 +95,43 @@ class WalletConnectionManager private constructor(private val context: Context) 
     // For smart contract wallets that are always "connected"
     suspend fun useSmartContractWallet(address: String) {
         connectWallet(address, "smartcontract")
+    }
+
+    // New method to ensure wallet is connected without user prompts
+    suspend fun ensureWalletConnected(ethereumManager: EthereumManager): Boolean {
+        val isConnected = _isConnected.value
+        val address = _walletAddress.value
+
+        Log.d("WalletManager", "Ensuring wallet connected: current state=$isConnected, address=$address")
+
+        if (isConnected && address.isNotBlank()) {
+            // Verify connection with Ethereum provider
+            try {
+                val ethAddress = ethereumManager.getWalletAddress()
+                if (!ethAddress.isNullOrBlank()) {
+                    Log.d("WalletManager", "Connection verified with provider: $ethAddress")
+                    return true // Connection verified
+                }
+
+                // Connection lost but we have saved credentials, try reconnecting
+                Log.d("WalletManager", "Saved connection not verified, attempting silent reconnect")
+                val result = ethereumManager.connect()
+                if (result is Result.Success) {
+                    val newAddress = ethereumManager.getWalletAddress()
+                    if (!newAddress.isNullOrBlank()) {
+                        connectWallet(newAddress, "metamask")
+                        Log.d("WalletManager", "Silent reconnection successful: $newAddress")
+                        return true
+                    }
+                }
+                Log.d("WalletManager", "Silent reconnection failed")
+            } catch (e: Exception) {
+                Log.e("WalletManager", "Wallet verification failed: ${e.message}", e)
+            }
+        } else {
+            Log.d("WalletManager", "No saved wallet connection")
+        }
+
+        return false
     }
 }

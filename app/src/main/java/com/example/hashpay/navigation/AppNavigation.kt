@@ -14,11 +14,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.hashpay.WalletConnectionManager
 import com.example.hashpay.ui.components.BottomNavigationBar
-import com.example.hashpay.ui.screens.HomeScreen
-import com.example.hashpay.ui.screens.QRScannerScreen
-import com.example.hashpay.ui.screens.SendMoneyScreen
-import com.example.hashpay.ui.screens.TransactionHistoryScreen
+import com.example.hashpay.ui.screens.*
+import com.example.hashpay.ui.screens.invoice.CreateInvoiceScreen
+import com.example.hashpay.ui.screens.invoice.InvoiceDetailScreen
+import com.example.hashpay.ui.screens.invoice.InvoiceListScreen
+import com.example.hashpay.ui.viewmodels.ProfileViewModel
 import com.example.hashpay.ui.viewmodels.SendMoneyViewModel
 import com.example.hashpay.ui.viewmodels.TransactionHistoryViewModel
 
@@ -29,6 +34,8 @@ object NavDestinations {
     const val WITHDRAW = "withdraw"
     const val PROFILE = "profile"
     const val SEND_MONEY = "send_money"
+    const val INVOICE = "invoice"
+    const val CREATE_INVOICE = "create_invoice"
 }
 
 /**
@@ -47,7 +54,7 @@ fun AppNavigation() {
     Scaffold(
         bottomBar = {
             // Only show the BottomNavigationBar if we're not on the "send_money" screen
-            if (currentRoute != NavDestinations.SEND_MONEY) {
+            if (currentRoute != NavDestinations.SEND_MONEY && currentRoute != NavDestinations.CREATE_INVOICE) {
                 BottomNavigationBar(navController)
             }
         }
@@ -107,13 +114,74 @@ fun AppNavHost(
             )
         }
 
+        composable(NavDestinations.PROFILE) {
+            // Create ProfileViewModel
+            val profileViewModel: ProfileViewModel = viewModel()
+
+            ProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onViewTransactions = {
+                    navController.navigate(NavDestinations.HISTORY)
+                },
+                onLogout = {
+                    // Handle logout - navigate back to home
+                    navController.navigate(NavDestinations.HOME) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                },
+                viewModel = profileViewModel
+            )
+        }
+
+        composable(NavDestinations.INVOICE) {
+            val context = LocalContext.current
+            val walletConnectionManager = WalletConnectionManager.getInstance(context)
+            val walletAddress = walletConnectionManager.walletAddress.collectAsState().value
+
+            InvoiceListScreen(
+                onCreateInvoice = { navController.navigate(NavDestinations.CREATE_INVOICE) },
+                onInvoiceClick = { invoiceId ->
+                    navController.navigate("invoice_detail/$invoiceId")
+                },
+                walletAddress = walletAddress
+            )
+        }
+
+        composable(NavDestinations.CREATE_INVOICE) {
+            val context = LocalContext.current
+            val walletConnectionManager = WalletConnectionManager.getInstance(context)
+            val walletAddress = walletConnectionManager.walletAddress.collectAsState().value
+
+            CreateInvoiceScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onContactSelect = { callback -> /* TODO: Implement contact selection */ },
+                walletAddress = walletAddress
+            )
+        }
+
+        composable(
+            route = "invoice_detail/{invoiceId}",
+            arguments = listOf(navArgument("invoiceId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val invoiceId = backStackEntry.arguments?.getLong("invoiceId") ?: 0L
+            val context = LocalContext.current
+            val walletConnectionManager = WalletConnectionManager.getInstance(context)
+            val walletAddress = walletConnectionManager.walletAddress.collectAsState().value
+
+            InvoiceDetailScreen(
+                invoiceId = invoiceId,
+                onNavigateBack = { navController.popBackStack() },
+                onPayInvoice = { id, amount, receiverAddress ->
+                    // Handle payment navigation
+                },
+                walletAddress = walletAddress // Use real wallet address
+            )
+        }
 
         composable(NavDestinations.WITHDRAW) {
             // TODO: Implement WithdrawScreen
-        }
-
-        composable(NavDestinations.PROFILE) {
-            // TODO: Implement ProfileScreen
         }
     }
 }

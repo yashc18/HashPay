@@ -5,19 +5,22 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.hashpay.data.database.daos.ContactDao
+import com.example.hashpay.data.database.daos.InvoiceDao
 import com.example.hashpay.data.database.daos.TransactionDao
 import com.example.hashpay.data.database.entities.Contact
+import com.example.hashpay.data.database.entities.Invoice
 import com.example.hashpay.data.database.entities.Transaction
 
 @Database(
-    entities = [Transaction::class, Contact::class],
-    version = 1,
+    entities = [Transaction::class, Contact::class, Invoice::class],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun transactionDao(): TransactionDao
     abstract fun contactDao(): ContactDao
+    abstract fun invoiceDao(): InvoiceDao
 
     companion object {
         @Volatile
@@ -30,7 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "hashpay_database"
                 )
-                    .fallbackToDestructiveMigration() // For now, you can replace with migration strategies later
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
