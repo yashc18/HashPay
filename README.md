@@ -59,6 +59,11 @@
   <img src="https://github.com/user-attachments/assets/c29c69e1-b7f2-4057-89fd-f151023d432c" alt="Screenshot 5" width="250"/>
 </p>
 
+---
+
+## 🎥 Demo Video
+
+[Watch HashPay Demo Video](https://drive.google.com/file/d/1nXGHvDOseJ8L2MHwa_iEVxLf7ZO-bkFQ/view?usp=drivesdk)
 
 ---
 
